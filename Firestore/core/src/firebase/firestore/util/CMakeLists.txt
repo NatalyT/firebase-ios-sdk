@@ -180,6 +180,8 @@ cc_library(
     comparison.cc
     comparison.h
     config.h
+    defer.cc
+    defer.h
     hashing.h
     iterator_adaptors.h
     ordered_code.cc

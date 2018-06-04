@@ -123,6 +123,7 @@ cc_test(
     autoid_test.cc
     bits_test.cc
     comparison_test.cc
+    defer_test.cc
     hashing_test.cc
     iterator_adaptors_test.cc
     ordered_code_test.cc
