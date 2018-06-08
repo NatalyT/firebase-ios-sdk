@@ -32,7 +32,7 @@ static bool Matches(NSError* error, NSErrorDomain domain, NSInteger code) {
   return [error.domain isEqual:domain] && error.code == code;
 }
 
-std::string GetTempDir() {
+std::string Dir::TempDir() {
   const char* env_tmpdir = getenv("TMPDIR");
   if (env_tmpdir) {
     return env_tmpdir;
@@ -46,7 +46,7 @@ std::string GetTempDir() {
   return "/tmp";
 }
 
-Status RecursivelyCreateDir(absl::string_view pathname) {
+Status Dir::RecursivelyCreate(absl::string_view pathname) {
   NSString* ns_path = WrapNSString(pathname);
 
   NSError* error = nil;
@@ -59,7 +59,7 @@ Status RecursivelyCreateDir(absl::string_view pathname) {
   return Status::OK();
 }
 
-Status RecursivelyDelete(absl::string_view pathname) {
+Status Dir::RecursivelyDelete(absl::string_view pathname) {
   NSString* ns_path = WrapNSString(pathname);
   NSError* error = nil;
   if (![[NSFileManager defaultManager] removeItemAtPath:ns_path error:&error]) {

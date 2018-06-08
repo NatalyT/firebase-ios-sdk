@@ -27,39 +27,51 @@ namespace firebase {
 namespace firestore {
 namespace util {
 
-/**
- * Creates a directory if it doesn't already exist.
- *
- * @return Ok if the directory was created. AlreadyExists if the directory
- *     already existed.
- */
-Status CreateDir(absl::string_view pathname);
+class Dir {
+ public:
+  /**
+   * Creates a directory if it doesn't already exist.
+   *
+   * @return Ok if the directory was created. AlreadyExists if the directory
+   *     already existed.
+   */
+  static Status Create(absl::string_view pathname);
 
-/**
- * Returns true if the given file exists.
- */
-bool Exists(const std::string& pathname);
+  /**
+   * Returns true if the given file exists and is a directory.
+   */
+  static bool Exists(const std::string& pathname);
 
-/**
- * Returns the best dictory in which to create temporary files.
- */
-std::string GetTempDir();
+  /**
+   * Returns the best dictory in which to create temporary files.
+   */
+  static std::string TempDir();
 
-/**
- * Recursively creates all the directories in the path name if they don't exist.
- *
- * @return Ok if the directory was created or already existed.
- */
-Status RecursivelyCreateDir(absl::string_view pathname);
+  /**
+   * Recursively creates all the directories in the path name if they don't
+   * exist.
+   *
+   * @return Ok if the directory was created or already existed.
+   */
+  static Status RecursivelyCreate(absl::string_view pathname);
 
-/**
- * Recursively deletes the contents of the given pathname. If the pathname is
- * a file, deletes just that file. The the pathname is a directory, deletes
- * everything within the directory.
- *
- * @return Ok if the directory was deleted or did not exist.
- */
-Status RecursivelyDelete(absl::string_view pathname);
+  /**
+   * Recursively deletes the contents of the given pathname. If the pathname is
+   * a file, deletes just that file. The the pathname is a directory, deletes
+   * everything within the directory.
+   *
+   * @return Ok if the directory was deleted or did not exist.
+   */
+  static Status RecursivelyDelete(absl::string_view pathname);
+};
+
+class File {
+ public:
+  /**
+   * Returns true if the given file exists.
+   */
+  static bool Exists(const std::string& pathname);
+};
 
 }  // namespace util
 }  // namespace firestore

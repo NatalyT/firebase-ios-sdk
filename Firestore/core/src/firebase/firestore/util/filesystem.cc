@@ -28,19 +28,53 @@ namespace firebase {
 namespace firestore {
 namespace util {
 
-Status CreateDir(absl::string_view pathname) {
+namespace {
+
+#if defined(_WIN32)
+
+// Converts a UTF-8-encoded filename to the equivalent wide character form,
+// suitable for use with Windows path-related functions.
+std::wstring Utf8ToWide(const std::string& input) {
+  // The result from MultiByteToWideChar is size of the buffer required to
+  // hold the null terminated result.
+  int output_size =
+      ::MultiByteToWideChar(CP_UTF8, 0, input.c_str(), -1, nullptr, 0);
+  if (output_size <= 1) {
+    return L"";
+  }
+
+  std::wstring output(output_size, '\0');
+  int result = ::MultiByteToWideChar(CP_UTF8, 0, input.c_str(), -1, &output[0],
+                                     output_size);
+  output.resize(result > 0 ? result - 1 : 0);
+  return output;
+}
+
+#endif  // defined(_WIN32)
+
+}  // namespace
+
+Status Dir::Create(absl::string_view pathname) {
   (void)pathname;
   HARD_FAIL("Unimplemented");
 }
 
-bool Exists(const std::string& pathname) {
+bool Dir::Exists(const std::string& pathname) {
+#if defined(_WIN32)
+  DWORD attrs = GetFileAttributesW(Utf8ToWide(pathname).c_str());
+  return attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY);
+
+#else
   struct stat buffer;
-  int rc = stat(pathname.c_str(), &buffer);
-  return rc == 0;
+  if (stat(pathname.c_str(), &buffer)) {
+    return false;
+  }
+  return S_ISDIR(buffer.st_mode);
+#endif
 }
 
 #if !defined(__APPLE__)
-std::string GetTempDir() {
+std::string Dir::TempDir() {
   const char* env_tmpdir = getenv("TMPDIR");
   if (env_tmpdir != nullptr) {
     return env_tmpdir;
@@ -62,17 +96,29 @@ std::string GetTempDir() {
 #endif  // defined(__ANDROID__)
 }
 
-Status RecursivelyCreateDir(absl::string_view pathname) {
+Status Dir::RecursivelyCreate(absl::string_view pathname) {
   (void)pathname;
   HARD_FAIL("Unimplemented");
 }
 
-Status RecursivelyDelete(absl::string_view pathname) {
+Status Dir::RecursivelyDelete(absl::string_view pathname) {
   (void)pathname;
   HARD_FAIL("Unimplemented");
 }
 
 #endif  // !defined(__APPLE__)
+
+bool File::Exists(const std::string& pathname) {
+#if defined(_WIN32)
+  DWORD attrs = GetFileAttributesW(Utf8ToWide(pathname).c_str());
+  return attrs != INVALID_FILE_ATTRIBUTES;
+
+#else
+  struct stat buffer;
+  int rc = stat(pathname.c_str(), &buffer);
+  return rc == 0;
+#endif
+}
 
 }  // namespace util
 }  // namespace firestore

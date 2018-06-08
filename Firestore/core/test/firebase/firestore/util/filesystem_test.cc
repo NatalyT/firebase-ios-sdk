@@ -44,15 +44,15 @@ static std::string TestFilename() {
   return "firestore-testing-" + CreateAutoId();
 }
 
-TEST(Filesystem, Exists) {
-  EXPECT_TRUE(Exists("/"));
+TEST(DirTest, Exists) {
+  EXPECT_TRUE(Dir::Exists("/"));
 
   std::string file = Path::Join("/", TestFilename());
-  EXPECT_FALSE(Exists(file));
+  EXPECT_FALSE(Dir::Exists(file));
 }
 
-TEST(Filesystem, GetTempDir) {
-  std::string tmp = GetTempDir();
+TEST(DirTest, GetTempDir) {
+  std::string tmp = Dir::TempDir();
   ASSERT_TRUE(absl::StartsWith(tmp, "/"));
 }
 
@@ -66,7 +66,7 @@ TEST(Filesystem, GetTempDirNoTmpdir) {
     ASSERT_EQ(nullptr, getenv("TMPDIR"));
   }
 
-  std::string tmp = GetTempDir();
+  std::string tmp = Dir::TempDir();
   ASSERT_TRUE(absl::StartsWith(tmp, "/"));
 
   // Save aside old value of TMPDIR, if set
@@ -77,12 +77,12 @@ TEST(Filesystem, GetTempDirNoTmpdir) {
 }
 
 TEST(Filesystem, RecursivelyCreateDir) {
-  std::string dir = Path::Join(GetTempDir(), TestFilename());
+  std::string dir = Path::Join(Dir::TempDir(), TestFilename());
 
   std::cerr << "Created dir " << dir << std::endl;
-  Status status = RecursivelyCreateDir(dir);
+  Status status = Dir::RecursivelyCreate(dir);
   ASSERT_OK(status);
-  ASSERT_TRUE(Exists(dir));
+  ASSERT_TRUE(Dir::Exists(dir));
 
   struct stat old_stat;
   if (stat(dir.c_str(), &old_stat)) {
@@ -96,40 +96,41 @@ TEST(Filesystem, RecursivelyCreateDir) {
     chmod(dir.c_str(), 0);
     Defer restore{[&]() { chmod(dir.c_str(), old_stat.st_mode); }};
 
-    status = RecursivelyCreateDir(subdir);
+    status = Dir::RecursivelyCreate(subdir);
     EXPECT_EQ(FirestoreErrorCode::PermissionDenied, status.code());
 
-    status = RecursivelyDelete(subdir);
+    status = Dir::RecursivelyDelete(subdir);
     EXPECT_EQ(FirestoreErrorCode::PermissionDenied, status.code());
   }
 
   // Permissions restored.
-  status = RecursivelyDelete(subdir);
+  status = Dir::RecursivelyDelete(subdir);
   EXPECT_OK(status);
 
-  status = RecursivelyCreateDir(subdir);
+  status = Dir::RecursivelyCreate(subdir);
   EXPECT_OK(status);
 
-  status = RecursivelyDelete(dir);
+  status = Dir::RecursivelyDelete(dir);
   ASSERT_OK(status);
-  ASSERT_FALSE(Exists(dir));
+  ASSERT_FALSE(Dir::Exists(dir));
 }
 
 TEST(Filesystem, RecursivelyDelete) {
-  std::string tmp_dir = GetTempDir();
-  ASSERT_TRUE(Exists(tmp_dir));
+  std::string tmp_dir = Dir::TempDir();
+  ASSERT_TRUE(Dir::Exists(tmp_dir));
 
   std::string file = Path::Join(tmp_dir, TestFilename());
-  Status status = RecursivelyDelete(file);
+  Status status = Dir::RecursivelyDelete(file);
   EXPECT_OK(status);
-  EXPECT_FALSE(Exists(file));
+  EXPECT_FALSE(Dir::Exists(file));
 
   Touch(file);
-  EXPECT_TRUE(Exists(file));
+  EXPECT_TRUE(File::Exists(file));
+  EXPECT_FALSE(Dir::Exists(file));
 
-  status = RecursivelyDelete(file);
+  status = Dir::RecursivelyDelete(file);
   EXPECT_OK(status);
-  EXPECT_FALSE(Exists(file));
+  EXPECT_FALSE(File::Exists(file));
 }
 
 }  // namespace util
