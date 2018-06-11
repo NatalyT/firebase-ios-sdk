@@ -87,7 +87,7 @@ add_library(
   GTest::Main ALIAS gtest_main
 )
 
-find_package(LevelDB REQUIRED)
+find_package(LevelDB)
 find_package(GRPC REQUIRED)
 find_package(Nanopb REQUIRED)
 find_package(Protobuf REQUIRED)
