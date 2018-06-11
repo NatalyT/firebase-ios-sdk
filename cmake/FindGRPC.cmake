@@ -22,10 +22,25 @@ set(BINARY_DIR ${FIREBASE_INSTALL_DIR}/external/grpc)
 # the grpc ExternalProject already figures out if zlib should be built or
 # referenced from its installed location. If it elected to allow grpc to build
 # zlib then it will be available at this location.
+find_path(
+  ZLIB_INCLUDE_DIR
+  NAMES zlib.h
+  PATHS
+    ${BINARY_DIR}/src/grpc-build/third_party/zlib
+  PATH_SUFFIXES include
+)
+
 find_library(
   ZLIB_LIBRARY
-  NAMES z
-  HINTS ${BINARY_DIR}/src/grpc-build/third_party/zlib
+  NAMES
+    z
+    zlib
+    zlibstatic
+    zlibstaticd
+  HINTS
+    ${BINARY_DIR}/src/grpc-build/third_party/zlib
+    ${BINARY_DIR}/src/grpc-build/third_party/zlib/Debug
+    ${BINARY_DIR}/src/grpc-build/third_party/zlib/Release
 )
 
 # If found above, the standard package will honor the ZLIB_LIBRARY variable.
