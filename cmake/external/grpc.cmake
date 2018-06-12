@@ -24,7 +24,6 @@ if(GRPC_ROOT)
 else()
   set(
     GIT_SUBMODULES
-    third_party/boringssl
     third_party/cares/cares
   )
 
@@ -64,6 +63,24 @@ else()
     )
 
   endif(ZLIB_FOUND)
+
+  # OpenSSL/BoringSSL
+  # On Windows FindOpenSSL does not work against the build-from-source-but-
+  # not-yet-installed BoringSSL. Honor OPENSSL_ROOT_DIR if passed from the
+  # command-line to work around this.
+  if(OPENSSL_ROOT_DIR)
+    list(
+      APPEND CMAKE_ARGS
+      -DgRPC_SSL_PROVIDER=package
+      -DOPENSSL_ROOT_DIR=${OPENSSL_ROOT_DIR}
+    )
+  else()
+    list(
+      APPEND GIT_SUBMODULES
+      third_party/boringssl
+    )
+
+  endif(OPENSSL_ROOT_DIR)
 
   ExternalProject_GitSource(
     GRPC_GIT

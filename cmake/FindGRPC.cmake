@@ -26,8 +26,7 @@ find_path(
   ZLIB_INCLUDE_DIR
   NAMES zlib.h
   PATHS
-    ${BINARY_DIR}/src/grpc-build/third_party/zlib
-  PATH_SUFFIXES include
+    ${BINARY_DIR}/src/grpc/third_party/zlib
 )
 
 find_library(
@@ -39,8 +38,8 @@ find_library(
     zlibstaticd
   HINTS
     ${BINARY_DIR}/src/grpc-build/third_party/zlib
-    ${BINARY_DIR}/src/grpc-build/third_party/zlib/Debug
     ${BINARY_DIR}/src/grpc-build/third_party/zlib/Release
+    ${BINARY_DIR}/src/grpc-build/third_party/zlib/Debug
 )
 
 # If found above, the standard package will honor the ZLIB_LIBRARY variable.
@@ -48,6 +47,9 @@ find_package(ZLIB REQUIRED)
 
 
 ## BoringSSL/OpenSSL
+
+set(OPENSSL_ROOT_DIR ${BINARY_DIR}/src/grpc-build/third_party/boringssl)
+set(OPENSSL_USE_STATIC_LIBS TRUE)
 
 find_path(
   OPENSSL_INCLUDE_DIR openssl/ssl.h
@@ -57,14 +59,22 @@ find_path(
 find_library(
   OPENSSL_SSL_LIBRARY
   NAMES ssl
-  HINTS ${BINARY_DIR}/src/grpc-build/third_party/boringssl/ssl
+  HINTS
+    ${BINARY_DIR}/src/grpc-build/third_party/boringssl/ssl
+    ${BINARY_DIR}/src/grpc-build/third_party/boringssl/ssl/Release
+    ${BINARY_DIR}/src/grpc-build/third_party/boringssl/ssl/Debug
 )
+message("OPENSSL_SSL_LIBRARY ${OPENSSL_SSL_LIBRARY}")
 
 find_library(
   OPENSSL_CRYPTO_LIBRARY
   NAMES crypto
-  HINTS ${BINARY_DIR}/src/grpc-build/third_party/boringssl/crypto
+  HINTS
+    ${BINARY_DIR}/src/grpc-build/third_party/boringssl/crypto
+    ${BINARY_DIR}/src/grpc-build/third_party/boringssl/crypto/Release
+    ${BINARY_DIR}/src/grpc-build/third_party/boringssl/crypto/Debug
 )
+message("OPENSSL_CRYPTO_LIBRARY ${OPENSSL_CRYPTO_LIBRARY}")
 
 find_package(OpenSSL REQUIRED)
 
